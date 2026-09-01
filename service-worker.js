@@ -1,9 +1,9 @@
-const CACHE_NAME = 'irctc-gen60-v4';
+const CACHE_NAME = 'irctc-gen60-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './train_app_icon.svg',
+  './train_app_icon.svg?v=5',
   './train_web_icon.svg?v=3'
 ];
 

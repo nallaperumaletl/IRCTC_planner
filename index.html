@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="train_web_icon.svg?v=3" />
-  <link rel="apple-touch-icon" href="train_app_icon.svg" />
+  <link rel="apple-touch-icon" href="train_app_icon.svg?v=5" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -1752,8 +1752,31 @@
       color: #4338ca;
     }
 
+    .gen60-calendar-item.booking,
+    .gen60-calendar-item.return-booking {
+      background: rgba(220, 252, 231, 0.95);
+      border-color: rgba(74, 222, 128, 0.2);
+      color: #047857;
+    }
+
+    .gen60-calendar-item.travel,
+    .gen60-calendar-item.return-travel {
+      background: rgba(254, 243, 199, 0.95);
+      border-color: rgba(251, 191, 36, 0.22);
+      color: #b45309;
+    }
+
+    .gen60-calendar-item.booking .gen60-calendar-label,
+    .gen60-calendar-item.return-booking .gen60-calendar-label {
+      color: #047857;
+    }
+
+    .gen60-calendar-item.travel .gen60-calendar-label,
+    .gen60-calendar-item.return-travel .gen60-calendar-label {
+      color: #b45309;
+    }
+
     @media (min-width: 1280px) {
-      .gen60-preferences,
       .gen60-advanced-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
@@ -2106,12 +2129,15 @@
       }
 
       .gen60-preferences,
-      .gen60-advanced-grid,
+      .gen60-calendar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .gen60-metrics {
         grid-template-columns: 1fr;
       }
 
-      .gen60-calendar-grid {
+      .gen60-advanced-grid {
         grid-template-columns: 1fr;
       }
 
@@ -2355,11 +2381,11 @@
       <section class="gen60-preferences" aria-label="Gen60 preferences">
         <label class="gen60-field">
           <span>From</span>
-          <input id="gen60-from" type="text" value="MDU / Madurai" />
+          <input id="gen60-from" type="text" list="gen60-stations" value="MDU" />
         </label>
         <label class="gen60-field">
           <span>To</span>
-          <input id="gen60-to" type="text" value="Chennai" />
+          <input id="gen60-to" type="text" list="gen60-stations" value="MS" />
         </label>
         <label class="gen60-field">
           <span>Outbound</span>
@@ -2377,6 +2403,12 @@
           <span>Cycles</span>
           <input id="gen60-cycles" type="number" min="1" max="12" value="5" />
         </label>
+        <datalist id="gen60-stations">
+          <option value="MDU"></option>
+          <option value="MS"></option>
+          <option value="Bengaluru"></option>
+          <option value="HYD"></option>
+        </datalist>
       </section>
 
       <details class="gen60-advanced">
@@ -2523,8 +2555,8 @@
       open: false,
       showCalendar: true,
       prefs: {
-        from: 'MDU / Madurai',
-        to: 'Chennai',
+        from: 'MDU',
+        to: 'MS',
         outboundDay: 1,
         returnDay: 4,
         officeDays: 3,
@@ -2547,6 +2579,7 @@
       state.selectedTravelDate = bookingWindowDate;
       state.viewMonth = startOfMonth(bookingWindowDate);
       render();
+      scrollToResultAfterSelection();
     }
 
     function initializeGen60() {
@@ -2586,7 +2619,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=4').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=5').catch(() => {});
         });
       }
     }
@@ -2808,8 +2841,8 @@
     }
 
     function syncGen60PrefsFromUI() {
-      gen60State.prefs.from = gen60Els.from.value.trim() || 'MDU / Madurai';
-      gen60State.prefs.to = gen60Els.to.value.trim() || 'Chennai';
+      gen60State.prefs.from = gen60Els.from.value.trim() || 'MDU';
+      gen60State.prefs.to = gen60Els.to.value.trim() || 'MS';
       gen60State.prefs.outboundDay = Number(gen60Els.outboundDay.value);
       gen60State.prefs.returnDay = Number(gen60Els.returnDay.value);
       gen60State.prefs.officeDays = Math.max(1, Math.min(14, Number(gen60Els.officeDays.value) || 3));

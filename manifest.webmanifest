@@ -9,13 +9,13 @@
   "description": "Calculate IRCTC train booking and travel dates based on the 60-day Advance Reservation Period.",
   "icons": [
     {
-      "src": "train_app_icon.svg",
+      "src": "train_app_icon.svg?v=5",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "train_app_icon.svg",
+      "src": "train_app_icon.svg?v=5",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
