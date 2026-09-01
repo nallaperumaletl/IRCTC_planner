@@ -2410,7 +2410,7 @@
         <label class="gen60-field">
           <span>From</span>
           <div class="gen60-station-control">
-            <input id="gen60-from" type="text" list="gen60-stations" value="MDU / Madurai" />
+            <input id="gen60-from" type="text" value="MDU / Madurai" placeholder="Or type custom station" />
             <select id="gen60-from-station-select" class="gen60-station-select" aria-label="Choose From station">
               <option value="">Choose station</option>
               <option value="MDU">MDU</option>
@@ -2423,7 +2423,7 @@
         <label class="gen60-field">
           <span>To</span>
           <div class="gen60-station-control">
-            <input id="gen60-to" type="text" list="gen60-stations" value="Chennai" />
+            <input id="gen60-to" type="text" value="Chennai" placeholder="Or type custom station" />
             <select id="gen60-to-station-select" class="gen60-station-select" aria-label="Choose To station">
               <option value="">Choose station</option>
               <option value="MDU">MDU</option>
@@ -2449,12 +2449,6 @@
           <span>Cycles</span>
           <input id="gen60-cycles" type="number" min="1" max="12" value="5" />
         </label>
-        <datalist id="gen60-stations">
-          <option value="MDU"></option>
-          <option value="MS"></option>
-          <option value="Bengaluru"></option>
-          <option value="HYD"></option>
-        </datalist>
       </section>
 
       <details class="gen60-advanced">
@@ -2680,7 +2674,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=6').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=7').catch(() => {});
         });
       }
     }
