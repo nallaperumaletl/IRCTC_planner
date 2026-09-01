@@ -2682,7 +2682,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=11').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=12').catch(() => {});
         });
       }
     }
@@ -3526,7 +3526,8 @@
       }
 
       syncGen60PrefsFromUI();
-      const cycles = gen60State.cycles.length ? gen60State.cycles : generateUpcomingCycles();
+      const cycles = generateUpcomingCycles();
+      gen60State.cycles = cycles;
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
 
