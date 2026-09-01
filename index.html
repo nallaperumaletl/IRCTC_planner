@@ -216,6 +216,7 @@
       border: 1px solid rgba(255, 255, 255, 0.72);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
+      min-width: 0;
     }
 
     .title-row {
@@ -298,6 +299,7 @@
       align-items: start;
       flex: 1;
       min-height: 0;
+      min-width: 0;
     }
 
     .panel {
@@ -399,6 +401,8 @@
       gap: 10px;
       flex: 1;
       min-height: 0;
+      min-width: 0;
+      max-width: 100%;
     }
 
     .month-card {
@@ -1837,6 +1841,8 @@
         padding-bottom: 4px;
         -webkit-overflow-scrolling: touch;
         align-items: flex-start;
+        min-width: 0;
+        max-width: 100%;
       }
 
       .months-wrap::-webkit-scrollbar {
@@ -2345,7 +2351,8 @@
       savedDates: [],
       showSavedList: false,
       calendarMonthCount: 2,
-      calendarAutoGrowArmed: true
+      calendarAutoGrowArmed: true,
+      calendarGrowthTimer: null
     };
 
     const gen60Weekdays = [
@@ -3835,6 +3842,10 @@
 
       if (!nearEnd) {
         state.calendarAutoGrowArmed = true;
+        if (state.calendarGrowthTimer) {
+          clearTimeout(state.calendarGrowthTimer);
+          state.calendarGrowthTimer = null;
+        }
         return;
       }
 
@@ -3842,14 +3853,29 @@
         return;
       }
 
-      state.calendarAutoGrowArmed = false;
-      state.calendarMonthCount += 1;
-      const nextMonthDate = addMonths(startOfMonth(state.viewMonth), state.calendarMonthCount - 1);
-      const selectedDate = getModeDate();
-      const pairedDate = getPairedDate();
-      const minDate = minSelectableDate();
-      const nextMonthCard = buildCalendarMonthCard(nextMonthDate, state.calendarMonthCount - 1, selectedDate, pairedDate, minDate);
-      els.calendarPanel.appendChild(nextMonthCard);
+      if (state.calendarGrowthTimer) {
+        return;
+      }
+
+      state.calendarGrowthTimer = window.setTimeout(() => {
+        state.calendarGrowthTimer = null;
+        if (!isMobileCalendarLayout()) return;
+        if (!els.calendarPanel || els.calendarPanel.dataset.mobileInfinite !== 'true') return;
+
+        const stillNearEnd = els.calendarPanel.scrollLeft + els.calendarPanel.clientWidth >= els.calendarPanel.scrollWidth - 64;
+        if (!stillNearEnd || !state.calendarAutoGrowArmed) {
+          return;
+        }
+
+        state.calendarAutoGrowArmed = false;
+        state.calendarMonthCount += 1;
+        const nextMonthDate = addMonths(startOfMonth(state.viewMonth), state.calendarMonthCount - 1);
+        const selectedDate = getModeDate();
+        const pairedDate = getPairedDate();
+        const minDate = minSelectableDate();
+        const nextMonthCard = buildCalendarMonthCard(nextMonthDate, state.calendarMonthCount - 1, selectedDate, pairedDate, minDate);
+        els.calendarPanel.appendChild(nextMonthCard);
+      }, 140);
     }
 
     els.calendarPanel.addEventListener('scroll', () => {
@@ -3861,6 +3887,10 @@
         state.calendarAutoGrowArmed = true;
       } else {
         state.calendarMonthCount = 2;
+      }
+      if (state.calendarGrowthTimer) {
+        clearTimeout(state.calendarGrowthTimer);
+        state.calendarGrowthTimer = null;
       }
       renderCalendars();
     };
