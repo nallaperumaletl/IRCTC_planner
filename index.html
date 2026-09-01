@@ -2960,6 +2960,68 @@
       });
     }
 
+    function escapeIcsText(value) {
+      return String(value)
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
+    }
+
+    function formatUtcIcsStamp(date, hour, minute) {
+      const utcMs = istDateTimeToUtcMs(date, hour, minute);
+      return new Date(utcMs).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    }
+
+    function buildGen60IcsContent(cycle, leg) {
+      const isOutbound = leg === 'outbound';
+      const bookingDate = isOutbound ? cycle.outbound.bookingDate : cycle.return.bookingDate;
+      const travelDate = isOutbound ? cycle.outbound.travelDate : cycle.return.travelDate;
+      const route = (isOutbound ? cycle.outboundRoute : cycle.returnRoute).replace(/→/g, '->');
+      const legLabel = isOutbound ? 'Outbound Booking' : 'Return Booking';
+      const eventStart = formatUtcIcsStamp(bookingDate, CALENDAR_BOOKING_START_HOUR, CALENDAR_BOOKING_START_MINUTE);
+      const eventEnd = formatUtcIcsStamp(bookingDate, CALENDAR_BOOKING_START_HOUR + 1, CALENDAR_BOOKING_START_MINUTE);
+      const reminderMinutes = 14 * 60;
+      const summary = `Gen60 ${legLabel} | ${route}`;
+      const description = [
+        `Cycle ${cycle.cycleNumber} ${cycle.status === 'ready' ? 'Ready' : 'Adjusted'}`,
+        `Route: ${route}`,
+        `Booking date: ${formatCycleLong(bookingDate).replace(' — ', ' - ')}`,
+        `Travel date: ${formatCycleLong(travelDate).replace(' — ', ' - ')}`,
+        `Booking starts at 08:00 AM IST`,
+        `Popup reminder set for Sep 2, 2026 6:00 PM IST when imported.`
+      ].join('\n');
+      const uid = `gen60-${cycle.cycleNumber}-${leg}-${bookingDate.getTime()}@irctc-app.local`;
+
+      return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//IRCTC Gen60//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-TIMEZONE:Asia/Kolkata',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${formatUtcIcsStamp(today, 0, 0)}`,
+        `DTSTART:${eventStart}`,
+        `DTEND:${eventEnd}`,
+        `SUMMARY:${escapeIcsText(summary)}`,
+        `DESCRIPTION:${escapeIcsText(description)}`,
+        `LOCATION:${escapeIcsText(`Gen60 | ${route}`)}`,
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Gen60 booking reminder',
+        `TRIGGER:-PT${reminderMinutes}M`,
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+    }
+
+    function buildGen60IcsDataUrl(cycle, leg) {
+      return `data:text/calendar;charset=utf-8,${encodeURIComponent(buildGen60IcsContent(cycle, leg))}`;
+    }
+
     function drawPdfLink(doc, x, y, label, url) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.2);
@@ -3046,16 +3108,16 @@
 
       y += 6;
       cycles.forEach((cycle, index) => {
-        if (y + 64 > 280) {
+        if (y + 76 > 280) {
           doc.addPage();
           y = 18;
         }
 
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(14, y, 182, 64, 4, 4, 'F');
+        doc.roundedRect(14, y, 182, 76, 4, 4, 'F');
         doc.setDrawColor(203, 213, 225);
         doc.setLineWidth(0.3);
-        doc.roundedRect(14, y, 182, 64, 4, 4, 'S');
+        doc.roundedRect(14, y, 182, 76, 4, 4, 'S');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
@@ -3074,16 +3136,24 @@
         drawPdfDateBlock(doc, 110, y + 30, 86, 'Return Travel', formatCycleLong(cycle.return.travelDate).replace(' — ', ' - '), returnTravelFill, returnTravelText, returnTravelBorder);
         const outboundCalendarUrl = buildGen60CalendarLink(cycle, 'outbound');
         const returnCalendarUrl = buildGen60CalendarLink(cycle, 'return');
+        const outboundIcsUrl = buildGen60IcsDataUrl(cycle, 'outbound');
+        const returnIcsUrl = buildGen60IcsDataUrl(cycle, 'return');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7);
         doc.setTextColor(71, 85, 105);
-        doc.text('Add to Calendar:', 18, y + 46);
+        doc.text('Google Calendar:', 18, y + 46);
         drawPdfLink(doc, 52, y + 46, 'Outbound Booking', outboundCalendarUrl);
         doc.setTextColor(148, 163, 184);
         doc.text('|', 104, y + 46);
         drawPdfLink(doc, 110, y + 46, 'Return Booking', returnCalendarUrl);
-        y += 70;
+        doc.setTextColor(71, 85, 105);
+        doc.text('ICS Reminder:', 18, y + 54);
+        drawPdfLink(doc, 52, y + 54, 'Outbound ICS', outboundIcsUrl);
+        doc.setTextColor(148, 163, 184);
+        doc.text('|', 97, y + 54);
+        drawPdfLink(doc, 103, y + 54, 'Return ICS', returnIcsUrl);
+        y += 82;
 
         if (index === cycles.length - 1 && y <= 260) {
           doc.setFontSize(9);
