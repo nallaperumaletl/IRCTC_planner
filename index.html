@@ -1889,6 +1889,16 @@
         width: 100%;
       }
 
+      .nav-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .nav-group .nav-button {
+        width: 100%;
+      }
+
       .segmented {
         padding: 4px;
         grid-template-columns: 1fr 1fr;
@@ -2531,8 +2541,8 @@
     function jumpToBookingWindowDate() {
       const bookingWindowDate = addDays(today, ARP_DAYS);
       resetMobileCalendarLayout();
-      state.mode = 'booking';
-      state.selectedBookingDate = bookingWindowDate;
+      state.mode = 'travel';
+      state.selectedTravelDate = bookingWindowDate;
       state.viewMonth = startOfMonth(bookingWindowDate);
       render();
     }
@@ -2562,8 +2572,8 @@
 
       els.bookingWindowDate.setAttribute('role', 'button');
       els.bookingWindowDate.setAttribute('tabindex', '0');
-      els.bookingWindowDate.setAttribute('aria-label', 'Jump to the current booking window date');
-      els.bookingWindowDate.title = 'Jump to the current booking window date';
+      els.bookingWindowDate.setAttribute('aria-label', 'Select the current booking window date as a travel date');
+      els.bookingWindowDate.title = 'Select this as a travel date';
       els.bookingWindowDate.addEventListener('click', jumpToBookingWindowDate);
       els.bookingWindowDate.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
