@@ -1,4 +1,4 @@
-const CACHE_NAME = 'irctc-gen60-v8';
+const CACHE_NAME = 'irctc-gen60-v10';
 const ASSETS = [
   './',
   './index.html',

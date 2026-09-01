@@ -2416,6 +2416,7 @@
               <option value="MS">MS</option>
               <option value="Bengaluru">Bengaluru</option>
               <option value="HYD">HYD</option>
+              <option value="__custom__">Custom station...</option>
             </select>
           </div>
         </label>
@@ -2429,6 +2430,7 @@
               <option value="MS">MS</option>
               <option value="Bengaluru">Bengaluru</option>
               <option value="HYD">HYD</option>
+              <option value="__custom__">Custom station...</option>
             </select>
           </div>
         </label>
@@ -2644,6 +2646,13 @@
       [[gen60Els.fromStationSelect, gen60Els.from], [gen60Els.toStationSelect, gen60Els.to]].forEach(([select, input]) => {
         select.addEventListener('change', () => {
           if (!select.value) return;
+          if (select.value === '__custom__') {
+            input.value = '';
+            input.style.display = 'block';
+            input.focus();
+            return;
+          }
+          input.style.display = 'none';
           input.value = select.value;
           renderGen60();
         });
@@ -2673,7 +2682,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=8').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=10').catch(() => {});
         });
       }
     }
@@ -3341,6 +3350,8 @@
     const CALENDAR_EVENT_DURATION_MINUTES = 60;
     const CALENDAR_BOOKING_START_HOUR = 8;
     const CALENDAR_BOOKING_START_MINUTE = 0;
+    const CALENDAR_REMINDER_START_HOUR = 18;
+    const CALENDAR_REMINDER_START_MINUTE = 0;
     const IST_OFFSET_MINUTES = 330;
 
     function istDateTimeToUtcMs(date, hour, minute) {
@@ -3380,23 +3391,24 @@
       const travelDate = isOutbound ? cycle.outbound.travelDate : cycle.return.travelDate;
       const route = (isOutbound ? cycle.outboundRoute : cycle.returnRoute).replace(/→/g, '->');
       const legLabel = isOutbound ? 'Outbound Booking' : 'Return Booking';
-      const title = `Gen60 ${legLabel} | ${route} | Travel ${formatCycleLong(travelDate).replace(' — ', ' - ')}`;
+      const reminderDate = addDays(bookingDate, -1);
+      const title = `Reminder: ${legLabel} tomorrow | ${route}`;
       const description = [
         `Cycle ${cycle.cycleNumber} ${cycle.status === 'ready' ? 'Ready' : 'Adjusted'}`,
         `Route: ${route}`,
         `Booking date: ${formatCycleLong(bookingDate).replace(' — ', ' - ')}`,
         `Travel date: ${formatCycleLong(travelDate).replace(' — ', ' - ')}`,
-        `Booking starts at 08:00 AM IST`,
-        `Reminder: use your Google Calendar default notification (1 day before).`
+        `Reminder event: ${formatCycleLong(reminderDate).replace(' — ', ' - ')} from 6:00 PM to 7:00 PM IST.`,
+        `Booking opens tomorrow at 8:00 AM IST. Please complete the ${legLabel.toLowerCase()} before 8:00 PM today.`
       ].join('\n');
 
       return buildGoogleCalendarEventUrl({
         title,
         description,
         location: `Gen60 | ${route}`,
-        startDate: bookingDate,
-        startHour: CALENDAR_BOOKING_START_HOUR,
-        startMinute: CALENDAR_BOOKING_START_MINUTE,
+        startDate: reminderDate,
+        startHour: CALENDAR_REMINDER_START_HOUR,
+        startMinute: CALENDAR_REMINDER_START_MINUTE,
         durationMinutes: CALENDAR_EVENT_DURATION_MINUTES
       });
     }
@@ -3430,7 +3442,7 @@
         `Booking date: ${formatCycleLong(bookingDate).replace(' — ', ' - ')}`,
         `Travel date: ${formatCycleLong(travelDate).replace(' — ', ' - ')}`,
         `Booking starts at 08:00 AM IST`,
-        `Popup reminder set for Sep 2, 2026 6:00 PM IST when imported.`
+        `Reminder: Tomorrow at 8:00 AM IST, complete the ${legLabel.toLowerCase()} before 8:00 PM today.`
       ].join('\n');
       const uid = `gen60-${cycle.cycleNumber}-${leg}-${bookingDate.getTime()}@irctc-app.local`;
 
@@ -3451,7 +3463,7 @@
         `LOCATION:${escapeIcsText(`Gen60 | ${route}`)}`,
         'BEGIN:VALARM',
         'ACTION:DISPLAY',
-        'DESCRIPTION:Gen60 booking reminder',
+        `DESCRIPTION:Reminder: ${legLabel} is due tomorrow at 8:00 AM IST`,
         `TRIGGER:-PT${reminderMinutes}M`,
         'END:VALARM',
         'END:VEVENT',
