@@ -2120,21 +2120,21 @@
 
       .gen60-station-control {
         display: flex;
+        flex-direction: column;
         gap: 6px;
       }
 
       .gen60-station-control input {
         min-width: 0;
-        flex: 1 1 auto;
+        width: 100%;
       }
 
       .gen60-station-select {
         display: block;
-        flex: 0 0 44px;
-        width: 44px;
-        min-width: 44px;
-        padding: 10px 3px;
-        font-size: 0.72rem;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
+        font-size: 0.78rem;
       }
 
       .gen60-calendar-item.booking,
@@ -2412,7 +2412,7 @@
           <div class="gen60-station-control">
             <input id="gen60-from" type="text" list="gen60-stations" value="MDU / Madurai" />
             <select id="gen60-from-station-select" class="gen60-station-select" aria-label="Choose From station">
-              <option value="">▼</option>
+              <option value="">Choose station</option>
               <option value="MDU">MDU</option>
               <option value="MS">MS</option>
               <option value="Bengaluru">Bengaluru</option>
@@ -2425,7 +2425,7 @@
           <div class="gen60-station-control">
             <input id="gen60-to" type="text" list="gen60-stations" value="Chennai" />
             <select id="gen60-to-station-select" class="gen60-station-select" aria-label="Choose To station">
-              <option value="">▼</option>
+              <option value="">Choose station</option>
               <option value="MDU">MDU</option>
               <option value="MS">MS</option>
               <option value="Bengaluru">Bengaluru</option>
@@ -2652,7 +2652,6 @@
         select.addEventListener('change', () => {
           if (!select.value) return;
           input.value = select.value;
-          select.value = '';
           renderGen60();
         });
       });
@@ -2681,7 +2680,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=5').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=6').catch(() => {});
         });
       }
     }
@@ -2907,6 +2906,8 @@
         && gen60Els.to.value === 'Chennai') {
         gen60Els.from.value = 'MDU';
         gen60Els.to.value = 'MS';
+        gen60Els.fromStationSelect.value = 'MDU';
+        gen60Els.toStationSelect.value = 'MS';
         renderGen60();
       }
       gen60State.open = open;
