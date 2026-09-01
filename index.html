@@ -3718,101 +3718,7 @@
       const minDate = minSelectableDate();
 
       months.forEach((monthDate, index) => {
-        const monthCard = document.createElement('article');
-        monthCard.className = 'month-card';
-
-        const header = document.createElement('div');
-        header.className = 'month-header';
-
-        const title = document.createElement('h3');
-        title.className = 'month-name';
-        title.textContent = formatMonth(monthDate);
-
-        const tag = document.createElement('p');
-        tag.className = 'month-tag';
-        tag.textContent = index === 0 ? 'Current / selected month' : 'Following month';
-
-        header.append(title, tag);
-
-        const weekdays = document.createElement('div');
-        weekdays.className = 'weekday-row';
-        const weekdayStart = addDays(today, -today.getDay());
-        for (let i = 0; i < 7; i++) {
-          const label = document.createElement('span');
-          label.textContent = weekdayFormatter.format(addDays(weekdayStart, i));
-          if (i === 0) label.classList.add('weekend-sun');
-          if (i === 6) label.classList.add('weekend-sat');
-          weekdays.appendChild(label);
-        }
-
-        const grid = document.createElement('div');
-        grid.className = 'day-grid';
-
-        const firstVisibleDay = addDays(monthDate, -monthDate.getDay());
-        for (let cell = 0; cell < 42; cell++) {
-          const current = addDays(firstVisibleDay, cell);
-          const inMonth = current.getMonth() === monthDate.getMonth();
-          const holidayName = inMonth ? getIndianLeaveName(current) : null;
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'day-button';
-          const dateNumber = document.createElement('span');
-          dateNumber.className = 'day-number';
-          dateNumber.textContent = String(current.getDate());
-          button.appendChild(dateNumber);
-
-          if (holidayName) {
-            button.title = `${formatDate(current)} — ${holidayName}`;
-            button.classList.add('leave');
-            const holidayTag = document.createElement('span');
-            holidayTag.className = 'day-holiday';
-            holidayTag.textContent = holidayName;
-            button.appendChild(holidayTag);
-          }
-
-          if (!inMonth) {
-            button.classList.add('outside-month');
-          }
-
-          if (inMonth && sameDay(current, today)) {
-            button.classList.add('today');
-          }
-
-          if (inMonth && current.getDay() === 0) {
-            button.classList.add('weekend-sun');
-          }
-
-          if (inMonth && current.getDay() === 6) {
-            button.classList.add('weekend-sat');
-          }
-
-          if (inMonth && sameDay(current, selectedDate)) {
-            button.classList.add('selected');
-          }
-
-          if (inMonth && sameDay(current, pairedDate)) {
-            button.classList.add('paired');
-          }
-
-          if (isBeforeDay(current, minDate)) {
-            button.disabled = true;
-            button.setAttribute('aria-disabled', 'true');
-          } else {
-            button.addEventListener('click', () => setSelectedDate(current));
-          }
-
-          const stateBits = [];
-          if (inMonth && sameDay(current, today)) stateBits.push('today');
-          if (inMonth && sameDay(current, selectedDate)) stateBits.push('selected');
-          if (inMonth && sameDay(current, pairedDate)) stateBits.push('calculated');
-          if (holidayName) stateBits.push(`leave: ${holidayName}`);
-          if (button.disabled) stateBits.push('unavailable');
-
-          button.setAttribute('aria-label', `${formatDate(current)}${stateBits.length ? `, ${stateBits.join(', ')}` : ''}`);
-          grid.appendChild(button);
-        }
-
-        monthCard.append(header, weekdays, grid);
+        const monthCard = buildCalendarMonthCard(monthDate, index, selectedDate, pairedDate, minDate);
         els.calendarPanel.appendChild(monthCard);
       });
 
@@ -3821,6 +3727,105 @@
       } else {
         delete els.calendarPanel.dataset.mobileInfinite;
       }
+    }
+
+    function buildCalendarMonthCard(monthDate, index, selectedDate, pairedDate, minDate) {
+      const monthCard = document.createElement('article');
+      monthCard.className = 'month-card';
+
+      const header = document.createElement('div');
+      header.className = 'month-header';
+
+      const title = document.createElement('h3');
+      title.className = 'month-name';
+      title.textContent = formatMonth(monthDate);
+
+      const tag = document.createElement('p');
+      tag.className = 'month-tag';
+      tag.textContent = index === 0 ? 'Current / selected month' : 'Following month';
+
+      header.append(title, tag);
+
+      const weekdays = document.createElement('div');
+      weekdays.className = 'weekday-row';
+      const weekdayStart = addDays(today, -today.getDay());
+      for (let i = 0; i < 7; i++) {
+        const label = document.createElement('span');
+        label.textContent = weekdayFormatter.format(addDays(weekdayStart, i));
+        if (i === 0) label.classList.add('weekend-sun');
+        if (i === 6) label.classList.add('weekend-sat');
+        weekdays.appendChild(label);
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'day-grid';
+
+      const firstVisibleDay = addDays(monthDate, -monthDate.getDay());
+      for (let cell = 0; cell < 42; cell++) {
+        const current = addDays(firstVisibleDay, cell);
+        const inMonth = current.getMonth() === monthDate.getMonth();
+        const holidayName = inMonth ? getIndianLeaveName(current) : null;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'day-button';
+        const dateNumber = document.createElement('span');
+        dateNumber.className = 'day-number';
+        dateNumber.textContent = String(current.getDate());
+        button.appendChild(dateNumber);
+
+        if (holidayName) {
+          button.title = `${formatDate(current)} — ${holidayName}`;
+          button.classList.add('leave');
+          const holidayTag = document.createElement('span');
+          holidayTag.className = 'day-holiday';
+          holidayTag.textContent = holidayName;
+          button.appendChild(holidayTag);
+        }
+
+        if (!inMonth) {
+          button.classList.add('outside-month');
+        }
+
+        if (inMonth && sameDay(current, today)) {
+          button.classList.add('today');
+        }
+
+        if (inMonth && current.getDay() === 0) {
+          button.classList.add('weekend-sun');
+        }
+
+        if (inMonth && current.getDay() === 6) {
+          button.classList.add('weekend-sat');
+        }
+
+        if (inMonth && sameDay(current, selectedDate)) {
+          button.classList.add('selected');
+        }
+
+        if (inMonth && sameDay(current, pairedDate)) {
+          button.classList.add('paired');
+        }
+
+        if (isBeforeDay(current, minDate)) {
+          button.disabled = true;
+          button.setAttribute('aria-disabled', 'true');
+        } else {
+          button.addEventListener('click', () => setSelectedDate(current));
+        }
+
+        const stateBits = [];
+        if (inMonth && sameDay(current, today)) stateBits.push('today');
+        if (inMonth && sameDay(current, selectedDate)) stateBits.push('selected');
+        if (inMonth && sameDay(current, pairedDate)) stateBits.push('calculated');
+        if (holidayName) stateBits.push(`leave: ${holidayName}`);
+        if (button.disabled) stateBits.push('unavailable');
+
+        button.setAttribute('aria-label', `${formatDate(current)}${stateBits.length ? `, ${stateBits.join(', ')}` : ''}`);
+        grid.appendChild(button);
+      }
+
+      monthCard.append(header, weekdays, grid);
+      return monthCard;
     }
 
     function growMobileCalendarMonthsIfNeeded() {
@@ -3838,13 +3843,13 @@
       }
 
       state.calendarAutoGrowArmed = false;
-      const scrollLeft = els.calendarPanel.scrollLeft;
       state.calendarMonthCount += 1;
-      renderCalendars();
-
-      window.requestAnimationFrame(() => {
-        els.calendarPanel.scrollLeft = scrollLeft;
-      });
+      const nextMonthDate = addMonths(startOfMonth(state.viewMonth), state.calendarMonthCount - 1);
+      const selectedDate = getModeDate();
+      const pairedDate = getPairedDate();
+      const minDate = minSelectableDate();
+      const nextMonthCard = buildCalendarMonthCard(nextMonthDate, state.calendarMonthCount - 1, selectedDate, pairedDate, minDate);
+      els.calendarPanel.appendChild(nextMonthCard);
     }
 
     els.calendarPanel.addEventListener('scroll', () => {
