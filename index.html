@@ -1929,6 +1929,76 @@
       .gen60-topbar {
         align-items: center;
       }
+
+      .gen60-topbar,
+      .gen60-section-head,
+      .gen60-cycle-head,
+      .gen60-route-row,
+      .gen60-info-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .gen60-topbar {
+        gap: 10px;
+      }
+
+      .gen60-close {
+        align-self: flex-end;
+        margin-top: -4px;
+      }
+
+      .gen60-summary-line {
+        font-size: 0.8rem;
+        line-height: 1.35;
+      }
+
+      .gen60-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .gen60-action {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .gen60-section-head h3 {
+        font-size: 0.82rem;
+      }
+
+      .gen60-cycle-head h4 {
+        font-size: 0.92rem;
+        line-height: 1.2;
+      }
+
+      .gen60-route-row {
+        width: 100%;
+        word-break: break-word;
+        line-height: 1.35;
+      }
+
+      .gen60-metric-value,
+      .gen60-calendar-value {
+        font-size: 0.8rem;
+      }
+
+      .gen60-calendar-legend {
+        gap: 6px;
+      }
+
+      .gen60-chip,
+      .gen60-calendar-legend .gen60-chip {
+        font-size: 0.62rem;
+      }
+
+      .gen60-overview-table {
+        font-size: 0.72rem;
+      }
+
+      .gen60-table-wrap {
+        border-radius: 16px;
+      }
     }
   </style>
 </head>
@@ -2234,7 +2304,9 @@
       selectedTravelDate: null,
       selectedBookingDate: null,
       savedDates: [],
-      showSavedList: false
+      showSavedList: false,
+      calendarMonthCount: 2,
+      calendarAutoGrowArmed: true
     };
 
     const gen60Weekdays = [
@@ -2347,6 +2419,12 @@
     function addMonths(date, months) {
       const next = new Date(date.getFullYear(), date.getMonth() + months, 1);
       return startOfMonth(next);
+    }
+
+    const mobileCalendarQuery = window.matchMedia('(max-width: 760px)');
+
+    function isMobileCalendarLayout() {
+      return mobileCalendarQuery.matches;
     }
 
     function sameDay(a, b) {
@@ -3549,8 +3627,8 @@
     function renderCalendars() {
       els.calendarPanel.innerHTML = '';
       const firstMonth = startOfMonth(state.viewMonth);
-      const secondMonth = addMonths(firstMonth, 1);
-      const months = [firstMonth, secondMonth];
+      const monthCount = isMobileCalendarLayout() ? Math.max(state.calendarMonthCount, 2) : 2;
+      const months = Array.from({ length: monthCount }, (_, index) => addMonths(firstMonth, index));
       const selectedDate = getModeDate();
       const pairedDate = getPairedDate();
       const minDate = minSelectableDate();
@@ -3653,6 +3731,55 @@
         monthCard.append(header, weekdays, grid);
         els.calendarPanel.appendChild(monthCard);
       });
+
+      if (isMobileCalendarLayout()) {
+        els.calendarPanel.dataset.mobileInfinite = 'true';
+      } else {
+        delete els.calendarPanel.dataset.mobileInfinite;
+      }
+    }
+
+    function growMobileCalendarMonthsIfNeeded() {
+      if (!isMobileCalendarLayout()) return;
+      if (!els.calendarPanel || els.calendarPanel.dataset.mobileInfinite !== 'true') return;
+      const nearEnd = els.calendarPanel.scrollLeft + els.calendarPanel.clientWidth >= els.calendarPanel.scrollWidth - 64;
+
+      if (!nearEnd) {
+        state.calendarAutoGrowArmed = true;
+        return;
+      }
+
+      if (!state.calendarAutoGrowArmed) {
+        return;
+      }
+
+      state.calendarAutoGrowArmed = false;
+      const scrollLeft = els.calendarPanel.scrollLeft;
+      state.calendarMonthCount += 1;
+      renderCalendars();
+
+      window.requestAnimationFrame(() => {
+        els.calendarPanel.scrollLeft = scrollLeft;
+      });
+    }
+
+    els.calendarPanel.addEventListener('scroll', () => {
+      window.requestAnimationFrame(growMobileCalendarMonthsIfNeeded);
+    }, { passive: true });
+
+    const handleMobileCalendarBreakpointChange = () => {
+      if (isMobileCalendarLayout()) {
+        state.calendarAutoGrowArmed = true;
+      } else {
+        state.calendarMonthCount = 2;
+      }
+      renderCalendars();
+    };
+
+    if (typeof mobileCalendarQuery.addEventListener === 'function') {
+      mobileCalendarQuery.addEventListener('change', handleMobileCalendarBreakpointChange);
+    } else if (typeof mobileCalendarQuery.addListener === 'function') {
+      mobileCalendarQuery.addListener(handleMobileCalendarBreakpointChange);
     }
 
     render();
