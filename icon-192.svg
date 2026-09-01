@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="IRCTC Train icon">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity=".18" />
+    </filter>
+  </defs>
+  <circle cx="96" cy="96" r="96" fill="url(#g)" />
+  <g filter="url(#shadow)">
+    <path d="M55 64c0-7 5.7-12.5 12.7-12.5h56.6C131.3 51.5 137 57 137 64v52.2c0 8.4-6.8 15.3-15.3 15.3h-3.9v7.4c0 3.6-2.9 6.5-6.5 6.5h-6.2c-3.6 0-6.5-2.9-6.5-6.5v-7.4H93.4v7.4c0 3.6-2.9 6.5-6.5 6.5h-6.2c-3.6 0-6.5-2.9-6.5-6.5v-7.4h-3.9C62.8 131.5 56 124.6 56 116.2V64Z" fill="#ffffff" />
+    <rect x="69" y="75" width="54" height="20" rx="10" fill="#2563eb" />
+    <rect x="75" y="80" width="14" height="10" rx="3" fill="#ffffff" opacity=".95" />
+    <rect x="103" y="80" width="14" height="10" rx="3" fill="#ffffff" opacity=".95" />
+    <path d="M66 109h60" stroke="#0f172a" stroke-width="4" stroke-linecap="round" opacity=".12" />
+    <circle cx="76" cy="137" r="10" fill="#0f172a" />
+    <circle cx="116" cy="137" r="10" fill="#0f172a" />
+    <path d="M58 114h12M122 114h12" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".9" />
+  </g>
+</svg>
