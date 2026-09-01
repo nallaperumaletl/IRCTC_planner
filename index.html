@@ -2125,8 +2125,7 @@
       }
 
       .gen60-station-control input {
-        min-width: 0;
-        width: 100%;
+        display: none;
       }
 
       .gen60-station-select {
@@ -2674,7 +2673,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=7').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=8').catch(() => {});
         });
       }
     }
