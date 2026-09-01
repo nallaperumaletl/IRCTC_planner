@@ -2682,7 +2682,7 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=10').catch(() => {});
+          navigator.serviceWorker.register('./service-worker.js?v=11').catch(() => {});
         });
       }
     }
@@ -3392,7 +3392,7 @@
       const route = (isOutbound ? cycle.outboundRoute : cycle.returnRoute).replace(/→/g, '->');
       const legLabel = isOutbound ? 'Outbound Booking' : 'Return Booking';
       const reminderDate = addDays(bookingDate, -1);
-      const title = `Reminder: ${legLabel} tomorrow | ${route}`;
+      const title = `Reminder: ${legLabel} Tomorrow | ${route} | travel date: ${formatCycleLong(travelDate).replace(' — ', ' - ')}`;
       const description = [
         `Cycle ${cycle.cycleNumber} ${cycle.status === 'ready' ? 'Ready' : 'Adjusted'}`,
         `Route: ${route}`,
