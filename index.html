@@ -3302,13 +3302,12 @@
         action: 'TEMPLATE',
         text: title,
         dates: `${start}/${end}`,
-        stz: CALENDAR_TZ,
-        etz: CALENDAR_TZ,
+        ctz: CALENDAR_TZ,
         details: description,
         location
       });
 
-      return `https://calendar.google.com/calendar/r/eventedit?${params.toString()}`;
+      return `https://calendar.google.com/calendar/render?${params.toString()}`;
     }
 
     function buildGen60CalendarLink(cycle, leg) {
@@ -3397,7 +3396,12 @@
     }
 
     function buildGen60IcsDataUrl(cycle, leg) {
-      return `data:text/calendar;charset=utf-8,${encodeURIComponent(buildGen60IcsContent(cycle, leg))}`;
+      const bytes = new TextEncoder().encode(buildGen60IcsContent(cycle, leg));
+      let binary = '';
+      bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+      });
+      return `data:text/calendar;base64,${btoa(binary)}`;
     }
 
     function drawPdfLink(doc, x, y, label, url) {
