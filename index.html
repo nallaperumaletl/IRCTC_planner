@@ -1940,6 +1940,7 @@
         padding: 10px;
         gap: 6px;
         border-radius: 16px;
+        scroll-margin-top: 12px;
       }
 
       .result-header {
@@ -2456,6 +2457,7 @@
       nextMonth: document.getElementById('next-month'),
       todayMonth: document.getElementById('today-month'),
       calendarPanel: document.getElementById('calendar-panel'),
+      resultCard: document.querySelector('.result-card'),
       selectionModePill: document.getElementById('selection-mode-pill'),
       resultState: document.getElementById('result-state'),
       sourceLabel: document.getElementById('source-label'),
@@ -3529,6 +3531,19 @@
         state.selectedBookingDate = date;
       }
       render();
+      scrollToResultAfterSelection();
+    }
+
+    function scrollToResultAfterSelection() {
+      if (!isMobileCalendarLayout() || !els.resultCard) return;
+
+      window.requestAnimationFrame(() => {
+        if (!isMobileCalendarLayout() || !els.resultCard) return;
+        els.resultCard.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
     }
 
     function saveCurrentSelection() {
