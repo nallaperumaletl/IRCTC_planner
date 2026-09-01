@@ -1,10 +1,10 @@
-const CACHE_NAME = 'irctc-gen60-v1';
+const CACHE_NAME = 'irctc-gen60-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon-192.svg',
-  './icon-512.svg'
+  './train_app_icon.svg',
+  './train_web_icon.svg'
 ];
 
 self.addEventListener('install', event => {
