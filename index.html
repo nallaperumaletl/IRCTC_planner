@@ -1393,6 +1393,14 @@
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
     }
 
+    .gen60-station-control {
+      display: contents;
+    }
+
+    .gen60-station-select {
+      display: none;
+    }
+
     .gen60-field textarea {
       resize: vertical;
       min-height: 84px;
@@ -2110,6 +2118,25 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .gen60-station-control {
+        display: flex;
+        gap: 6px;
+      }
+
+      .gen60-station-control input {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .gen60-station-select {
+        display: block;
+        flex: 0 0 44px;
+        width: 44px;
+        min-width: 44px;
+        padding: 10px 3px;
+        font-size: 0.72rem;
+      }
+
       .gen60-calendar-item.booking,
       .gen60-calendar-item.return-booking {
         background: rgba(220, 252, 231, 0.95);
@@ -2382,11 +2409,29 @@
       <section class="gen60-preferences" aria-label="Gen60 preferences">
         <label class="gen60-field">
           <span>From</span>
-          <input id="gen60-from" type="text" list="gen60-stations" value="MDU / Madurai" />
+          <div class="gen60-station-control">
+            <input id="gen60-from" type="text" list="gen60-stations" value="MDU / Madurai" />
+            <select id="gen60-from-station-select" class="gen60-station-select" aria-label="Choose From station">
+              <option value="">▼</option>
+              <option value="MDU">MDU</option>
+              <option value="MS">MS</option>
+              <option value="Bengaluru">Bengaluru</option>
+              <option value="HYD">HYD</option>
+            </select>
+          </div>
         </label>
         <label class="gen60-field">
           <span>To</span>
-          <input id="gen60-to" type="text" list="gen60-stations" value="Chennai" />
+          <div class="gen60-station-control">
+            <input id="gen60-to" type="text" list="gen60-stations" value="Chennai" />
+            <select id="gen60-to-station-select" class="gen60-station-select" aria-label="Choose To station">
+              <option value="">▼</option>
+              <option value="MDU">MDU</option>
+              <option value="MS">MS</option>
+              <option value="Bengaluru">Bengaluru</option>
+              <option value="HYD">HYD</option>
+            </select>
+          </div>
         </label>
         <label class="gen60-field">
           <span>Outbound</span>
@@ -2516,6 +2561,8 @@
       summaryLine: document.getElementById('gen60-summary-line'),
       from: document.getElementById('gen60-from'),
       to: document.getElementById('gen60-to'),
+      fromStationSelect: document.getElementById('gen60-from-station-select'),
+      toStationSelect: document.getElementById('gen60-to-station-select'),
       outboundDay: document.getElementById('gen60-outbound-day'),
       returnDay: document.getElementById('gen60-return-day'),
       officeDays: document.getElementById('gen60-office-days'),
@@ -2555,6 +2602,7 @@
     const gen60State = {
       open: false,
       showCalendar: true,
+      historyEntry: false,
       prefs: {
         from: 'MDU / Madurai',
         to: 'Chennai',
@@ -2600,10 +2648,23 @@
         control.addEventListener('input', renderGen60);
         control.addEventListener('change', renderGen60);
       });
+      [[gen60Els.fromStationSelect, gen60Els.from], [gen60Els.toStationSelect, gen60Els.to]].forEach(([select, input]) => {
+        select.addEventListener('change', () => {
+          if (!select.value) return;
+          input.value = select.value;
+          select.value = '';
+          renderGen60();
+        });
+      });
       window.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
           setGen60Open(false);
         }
+      });
+      window.addEventListener('popstate', () => {
+        if (!gen60State.open || !gen60State.historyEntry) return;
+        gen60State.historyEntry = false;
+        setGen60Open(false);
       });
 
       els.bookingWindowDate.setAttribute('role', 'button');
@@ -2832,6 +2893,15 @@
     }
 
     function setGen60Open(open) {
+      if (open && !gen60State.open && isMobileCalendarLayout()) {
+        history.pushState({ ...(history.state || {}), gen60Open: true }, '', window.location.href);
+        gen60State.historyEntry = true;
+      }
+      if (!open && gen60State.open && gen60State.historyEntry && isMobileCalendarLayout()) {
+        gen60State.historyEntry = false;
+        history.back();
+        return;
+      }
       if (open && isMobileCalendarLayout()
         && gen60Els.from.value === 'MDU / Madurai'
         && gen60Els.to.value === 'Chennai') {
